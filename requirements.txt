@@ -2,7 +2,7 @@
 attrs==25.3.0
 blinker==1.9.0
 cachetools==6.1.0
-certifi==2024.12.4        # versão mais estável para Python 3.11
+certifi
 charset-normalizer==3.4.3
 click==8.1.7              # última suportada no Py311
 colorama==0.4.6
@@ -40,4 +40,5 @@ typing_extensions==4.12.2
 tzdata==2024.1
 urllib3==2.2.2
 watchdog==4.0.1
+
 
