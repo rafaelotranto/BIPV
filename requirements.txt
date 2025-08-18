@@ -1,43 +1,42 @@
-﻿altair==5.5.0
+﻿aaltair==5.5.0
 attrs==25.3.0
 blinker==1.9.0
 cachetools==6.1.0
-certifi==2025.8.3
+certifi==2024.12.4        # versão mais estável para Python 3.11
 charset-normalizer==3.4.3
-click==8.2.1
+click==8.1.7              # última suportada no Py311
 colorama==0.4.6
 gitdb==4.0.12
 GitPython==3.1.45
 idna==3.10
 ifcopenshell==0.7.0.240510
 isodate==0.7.2
-Jinja2==3.1.6
-jsonschema==4.25.0
-jsonschema-specifications==2025.4.1
+Jinja2==3.1.4             # 3.1.6 não existe estável p/ Py311
+jsonschema==4.23.0        # última compatível com Py311
+jsonschema-specifications==2023.12.1
 lark==1.2.2
-MarkupSafe==3.0.2
+MarkupSafe==2.1.5         # 3.0.2 quebra em algumas builds
 narwhals==2.1.2
-numpy==2.3.2
-packaging==25.0
-pandas==2.3.1
-pillow==11.3.0
-protobuf==6.32.0
-pyarrow==21.0.0
+numpy==2.0.2              # última estável para Py311
+packaging==24.1
+pandas==2.2.2             # estável para Py311
+pillow==10.3.0            # última suportada no Py311
+protobuf==5.27.2          # 6.x não tem wheel p/ Py311
+pyarrow==16.1.0           # compatível c/ pandas 2.2
 pydeck==0.9.1
 python-dateutil==2.9.0.post0
-pytz==2025.2
-referencing==0.36.2
-requests==2.32.4
-rpds-py==0.27.0
-shapely==2.1.1
-six==1.17.0
+pytz==2024.1
+referencing==0.35.1
+requests==2.32.3
+rpds-py==0.20.0
+shapely==2.0.5
+six==1.16.0
 smmap==5.0.2
 streamlit==1.36
-tenacity==9.1.2
+tenacity==9.0.0
 toml==0.10.2
-tornado==6.5.2
-typing_extensions==4.14.1
-tzdata==2025.2
-urllib3==2.5.0
-watchdog==6.0.0
-
+tornado==6.4.1
+typing_extensions==4.12.2
+tzdata==2024.1
+urllib3==2.2.2
+watchdog==4.0.1
