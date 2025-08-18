@@ -1,7 +1,7 @@
 ﻿altair==5.5.0
 attrs==25.3.0
 blinker==1.9.0
-cachetools==6.1.0
+cachetools<6,>=4.0
 certifi
 charset-normalizer==3.4.3
 click==8.1.7              # última suportada no Py311
@@ -40,6 +40,7 @@ typing_extensions==4.12.2
 tzdata==2024.1
 urllib3==2.2.2
 watchdog==4.0.1
+
 
 
 
