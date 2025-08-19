@@ -11,11 +11,12 @@ st.set_page_config(page_title="BIPV IFC",
                    layout="wide")
 
 with st.sidebar:
+    with st.container(border=False):
+        col_esq, col_centro, col_dir = st.columns([1, 2, 1])
+        with col_centro:
+            st.image("ime.png", width=100)
 
-    with st.container(horizontal=True ,horizontal_alignment="center"):
-        st.image(image="ime.png", width=100)
-    
-    uploaded_file = st.file_uploader(label="Selecione o arquivo IFC:", type=["ifc"])
+    uploaded_file = st.file_uploader("Selecione o arquivo IFC:", type=["ifc"])
 
     st.write("Apoie nosso trabalho com um PIX")
     st.image("Captura de tela 2025-08-19 113232.png")
@@ -86,4 +87,5 @@ if uploaded_file:
     st.write(f"Quantidade: {len(dados_paredes)} paredes.")
     st.dataframe(df_paredes, use_container_width=True)
     
+
    
