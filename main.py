@@ -173,8 +173,10 @@ if uploaded_file:
     # with col2:
     #     st.header("Cálculo por meio do PVLIB")
     
-    with st.container(horizontal_alignment="center", horizontal=True):
-        st.image("pvlib.png", width=900, output_format="auto")
+    with st.container():
+    c1, c2, c3 = st.columns([1, 2, 1])
+    with c2:
+        st.image("ime.png", width=100)
     st.dataframe(df_unidos)
 
     st.header(f"Dados Janelas Externas:")    
@@ -184,4 +186,5 @@ if uploaded_file:
     
     st.header("Dados Paredes Externas:")    
     st.write(f"Quantidade: {len(dados_paredes)} paredes.")
+
     st.dataframe(df_paredes, use_container_width=True)
