@@ -17,7 +17,7 @@ with st.sidebar:
     with st.container(border=False):
         col_esq, col_centro, col_dir = st.columns([1, 2, 1])
         with col_centro:
-            st.image("ime.png", width=100)
+            st.image("pvlib.png", width=100)
 
     uploaded_file = st.file_uploader("Selecione o arquivo IFC:", type=["ifc"])
 
@@ -188,4 +188,5 @@ if uploaded_file:
     st.write(f"Quantidade: {len(dados_paredes)} paredes.")
 
     st.dataframe(df_paredes, use_container_width=True)
+
 
