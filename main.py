@@ -167,14 +167,10 @@ if uploaded_file:
     lista_geracoes_telhados_df_renomeado[['Orientação (Azimute °)', 'Geração Anual Estimada']],
     on='Orientação (Azimute °)')
 
-    # col1, col2, col3 = st.columns(3)
-    # with col1:
-    #     st.image('pvlib_logo_horiz.webp', width=300)
-    # with col2:
-    #     st.header("Cálculo por meio do PVLIB")
+
     
-    with st.container(horizontal_alignment="center", horizontal=True):
-        st.image("pvlib.png", width=900, output_format="auto")
+
+    st.image("pvlib.png", width=900, output_format="auto")
     st.dataframe(df_unidos)
 
     st.header(f"Dados Janelas Externas:")    
@@ -185,4 +181,5 @@ if uploaded_file:
     st.header("Dados Paredes Externas:")    
     st.write(f"Quantidade: {len(dados_paredes)} paredes.")
     st.dataframe(df_paredes, use_container_width=True)
+
 
