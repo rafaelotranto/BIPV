@@ -1,22 +1,19 @@
 import streamlit as st
-import core
 import pandas as pd
-import numpy as np
 import ifcopenshell
 import tempfile
-import base64
-import streamlit.components.v1 as components
 import pvlib
+import core  # mantém suas funções
 
+st.set_page_config(page_title="BIPV IFC", page_icon="☀️", layout="wide")
 
-st.set_page_config(page_title="BIPV IFC",
-                   page_icon = "☀️",
-                   layout="wide")
-
+# -------------------------
+# SIDEBAR
+# -------------------------
 with st.sidebar:
     with st.container(border=False):
-        col_esq, col_centro, col_dir = st.columns([1, 2, 1])
-        with col_centro:
+        c1, c2, c3 = st.columns([1, 2, 1])
+        with c2:
             st.image("ime.png", width=100)
 
     uploaded_file = st.file_uploader("Selecione o arquivo IFC:", type=["ifc"])
@@ -24,23 +21,97 @@ with st.sidebar:
     st.write("Apoie nosso trabalho com um PIX")
     st.image("Captura de tela 2025-08-19 113232.png")
 
+# -------------------------
+# TÍTULO
+# -------------------------
 st.title("BIM-BIPV")
 
+# -------------------------
+# FUNÇÃO DE CÁLCULO (SOMENTE CÁLCULO → RETORNA DADOS)
+# -------------------------
+def calcular_pvlib(df_info_geral, df_telhados, eficiencia_painel, eficiencia_inversor, perdas_sistema):
+    # Cópia para evitar alterar original
+    df_telhados = df_telhados.copy()
+
+    # Latitude/Longitude
+    latitude = float(df_info_geral.loc[0, "Latitude"])
+    longitude = float(df_info_geral.loc[0, "Longitude"])
+    altitude = 0.0
+
+    # Chave estável (evita merge por float)
+    if "TelhadoID" not in df_telhados.columns:
+        df_telhados["TelhadoID"] = range(1, len(df_telhados) + 1)
+
+    # Meteo TMY (PVGIS) — pode ser cacheado se quiser
+    weather = pvlib.iotools.get_pvgis_tmy(latitude, longitude)[0]
+    weather.index.name = "utc_time"
+
+    # Posição solar
+    posicao_sol = pvlib.solarposition.get_solarposition(
+        time=weather.index,
+        latitude=latitude,
+        longitude=longitude,
+        altitude=altitude,
+        temperature=weather["temp_air"],
+        pressure=weather["pressure"],
+    )
+
+    # Cálculo por telhado
+    resultados = []
+    cols_req = ["TelhadoID", "Área Bruta (m²)", "Inclinação (°)", "Orientação (Azimute °)"]
+    telhados = df_telhados[cols_req].copy()
+
+    for _, row in telhados.iterrows():
+        area_total = float(row["Área Bruta (m²)"])
+        tilt = float(row["Inclinação (°)"])
+        azm = float(row["Orientação (Azimute °)"])
+
+        irr = pvlib.irradiance.get_total_irradiance(
+            surface_tilt=tilt,
+            surface_azimuth=azm,
+            solar_zenith=posicao_sol["apparent_zenith"],
+            solar_azimuth=posicao_sol["azimuth"],
+            dni=weather["dni"],
+            ghi=weather["ghi"],
+            dhi=weather["dhi"],
+        )
+        irr_df = pd.DataFrame(irr)
+
+        # Potência equivalente dos módulos (kW para POA=1000 W/m²)
+        potencia_paineis_kw = area_total * eficiencia_painel
+
+        # Energia DC horária (kWh)
+        energia_dc_kwh = (irr_df["poa_global"] / 1000.0) * potencia_paineis_kw
+
+        # Energia AC (kWh) com perdas
+        energia_ac_kwh = energia_dc_kwh * eficiencia_inversor * (1.0 - perdas_sistema)
+
+        resultados.append({
+            "TelhadoID": row["TelhadoID"],
+            "Geração Anual Estimada (kWh)": float(energia_ac_kwh.sum())
+        })
+
+    df_res = pd.DataFrame(resultados)
+    df_unidos = df_telhados.merge(df_res, on="TelhadoID", how="left")
+    return df_unidos
+
+# -------------------------
+# FLUXO PRINCIPAL
+# -------------------------
 if uploaded_file:
     st.success("Arquivo carregado com sucesso!")
-    with tempfile.NamedTemporaryFile(delete=False, suffix=".ifc") as tmp:
-        tmp.write(uploaded_file.getbuffer())  # salva conteúdo no temp
-        tmp_path = tmp.name  # caminho do arquivo temporário
 
-    # agora abre com o ifcopenshell
+    # Salva temporário e abre
+    with tempfile.NamedTemporaryFile(delete=False, suffix=".ifc") as tmp:
+        tmp.write(uploaded_file.getbuffer())
+        tmp_path = tmp.name
     ifc_file = ifcopenshell.open(tmp_path)
 
-
+    # Extrai dados
     info_geral = core.extrair_info_geografica(ifc_file)
-    norte_vetor_principal = core.find_true_north(ifc_file)
-
     df_info_geral = pd.DataFrame(info_geral)
 
+    norte_vetor_principal = core.find_true_north(ifc_file)
 
     dados_paredes = core.extrair_dados_paredes(ifc_file, norte_vetor_principal)
     df_paredes = pd.DataFrame(dados_paredes)
@@ -48,138 +119,88 @@ if uploaded_file:
     dados_janelas = core.extrair_dados_janelas(ifc_file, norte_vetor_principal)
     df_janelas = pd.DataFrame(dados_janelas)
 
-
     dados_telhados = core.extrair_dados_telhados(ifc_file, norte_vetor_principal)
     df_telhados = pd.DataFrame(dados_telhados)
 
-    st.header("Informações Gerais:")
+    # --- INFORMAÇÕES GERAIS ---
+    st.header("Informações Gerais")
     st.dataframe(df_info_geral, use_container_width=True)
 
+    # Mapa (só converte para string aqui)
+    lat_str = str(df_info_geral.loc[0, "Latitude"])
+    lon_str = str(df_info_geral.loc[0, "Longitude"])
+    map_url = f"https://www.google.com/maps?q={lat_str},{lon_str}&hl=pt&z=16&t=k&output=embed"
 
-    latitude = str(info_geral[0]['Latitude'])
-    longitude = str(info_geral[0]['Longitude'])
-
-    # Monta o link do Google Maps com as coordenadas
-    map_url = f"https://www.google.com/maps?q={latitude},{longitude}&hl=pt&z=16&t=k&output=embed"
-
-
-    # Exibe o mapa no Streamlit
     st.markdown(
         f"""
         <iframe
-        src="{map_url}"
-        width="100%"
-        height="500"
-        style="border:0;"
-        allowfullscreen=""
-        loading="lazy"
-        ></iframe>
+          src="{map_url}"
+          width="100%"
+          height="500"
+          style="border:0;"
+          loading="lazy"
+          referrerpolicy="no-referrer-when-downgrade"></iframe>
         """,
         unsafe_allow_html=True
     )
 
-    st.header("Dados Telhados:")    
-    st.dataframe(df_telhados)
+    # --- TELHADOS ---
+    st.header("Dados Telhados")
+    st.dataframe(df_telhados, use_container_width=True)
 
-    
-   
-   #CALCULO PVLIB
-
-    dados = core.extrair_info_geografica(ifc_file)
-    dados_df = pd.DataFrame(dados)
-    latitude = dados[0]['Latitude']
-    longitude = dados[0]['Longitude']
-
-    norte_vetor_principal = core.find_true_north(ifc_file)
-    
-
-    dados_telhado = core.extrair_dados_telhados(ifc_file, norte_vetor_principal)
-    dados_telhado_df = pd.DataFrame(dados_telhado)
-    altitude = 0
-    coordinates = [(latitude, longitude, "Rio de Janeiro", altitude,'Etc/GMT-3')]
-
-    dados_tmy = []
-
-    for location in coordinates:
-        latitude, longitude, name, altitude, timezone = location
-
-    weather = pvlib.iotools.get_pvgis_tmy(latitude, longitude)[0]
-    weather.index.name = "utc_time"
-    dados_tmy.append(weather)
-
-    posicao_sol = pvlib.solarposition.get_solarposition(
-        time=weather.index,
-        latitude=latitude,
-        longitude=longitude,
-        altitude=altitude,
-        temperature=weather["temp_air"],
-        pressure=weather["pressure"],)
-    # 2. Parâmetros do sistema fotovoltaico
-    area_total_paineis = [area for area in dados_telhado_df['Área Bruta (m²)']] # em metros quadrados
-    inclinacao = [inclinacao for inclinacao in dados_telhado_df['Inclinação (°)']]       # inclinação dos painéis em graus
-    azimuth = [azimuth for azimuth in dados_telhado_df['Orientação (Azimute °)']]         # Orientação (180 graus = norte no hemisfério sul)
-
-    lista_paramentos = zip(area_total_paineis, inclinacao, azimuth)
-
-    # 3. Eficiência e Perdas
-    eficiencia_painel = 0.22  # 20% de eficiência do módulo
-    eficiencia_inversor = 0.96 # 96% de eficiência do inversor
-    perdas_sistema = 0.09     # 14% de perdas totais (sujeira, cabos, temperatura, etc.)
-
-    lista_geracoes_telhados = []
-
-    for item in lista_paramentos:
-        area_total_paineis, inclinacao, azimuth = item
-
-        irradiacao_plano_inclinado = pvlib.irradiance.get_total_irradiance(
-            surface_tilt=inclinacao,
-            surface_azimuth=azimuth,
-            solar_zenith=posicao_sol['apparent_zenith'],
-            solar_azimuth=posicao_sol['azimuth'],
-            dni=dados_tmy[0]['dni'],
-            ghi=dados_tmy[0]['ghi'],
-            dhi=dados_tmy[0]['dhi']
+    # Parâmetros do sistema
+    with st.expander("Parâmetros do Sistema (ajuste conforme necessário)", expanded=True):
+        col1, col2, col3 = st.columns(3)
+        with col1:
+            eficiencia_painel = st.number_input(
+                "Eficiência do Painel (0–1)", min_value=0.0, max_value=1.0, value=0.22, step=0.01,
+                help="Ex.: 0.22 = 22%"
             )
-        # Converter a irradiação para um DataFrame do pandas
-        irradiacao_df = pd.DataFrame(irradiacao_plano_inclinado)
+        with col2:
+            eficiencia_inversor = st.number_input(
+                "Eficiência do Inversor (0–1)", min_value=0.0, max_value=1.0, value=0.96, step=0.01
+            )
+        with col3:
+            perdas_sistema = st.number_input(
+                "Perdas do Sistema (0–1)", min_value=0.0, max_value=1.0, value=0.14, step=0.01,
+                help="Perdas agregadas: cabos, sujeira, mismatch, temperatura etc."
+            )
 
-        # Calcular a potência de saída CC (Corrente Contínua) do sistema
-        # A potência do painel é a área x eficiência
-        potencia_paineis = area_total_paineis * eficiencia_painel
+    # --------- BOTÃO ---------
+    # O cálculo é feito no clique e os dados ficam no session_state
+    if st.button("Calcular"):
+        with st.spinner("Calculando geração com PVLib..."):
+            st.session_state["df_unidos"] = calcular_pvlib(
+                df_info_geral=df_info_geral,
+                df_telhados=df_telhados,
+                eficiencia_painel=eficiencia_painel,
+                eficiencia_inversor=eficiencia_inversor,
+                perdas_sistema=perdas_sistema
+            )
 
-        # A energia CC é a irradiação (em W/m²) x potência dos painéis
-        # Dividimos por 1000 para converter de W para kW
-        energia_dc = (irradiacao_df['poa_global'] / 1000) * potencia_paineis
+    # -------------------------
+    # PLACEHOLDER POSICIONADO *AQUI* (DEPOIS DO BOTÃO E DAS SEÇÕES)
+    # -------------------------
+    resultados_box = st.container()
 
-        # Calcular a energia de saída CA (Corrente Alternada), considerando as perdas
-        energia_ac = energia_dc * eficiencia_inversor * (1 - perdas_sistema)
+    # Renderização ANCORADA no placeholder
+    with resultados_box:
+        if "df_unidos" in st.session_state:
+            st.image("pvlib.png", width=900, output_format="auto")
+            st.subheader("Resultados — Geração Estimada")
+            st.dataframe(st.session_state["df_unidos"], use_container_width=True)
 
-        # Calcular a geração anual total somando a energia de cada hora
-        geracao_anual_kwh = energia_ac.sum()
+            st.subheader("Dados Janelas Externas")
+            st.write(f"Quantidade: {len(df_janelas)} janelas.")
+            st.dataframe(df_janelas, use_container_width=True)
 
-        lista_geracoes_telhados.append({'Área dos Painéis':area_total_paineis, 'Inclinação':inclinacao, 'Orientação: Norte': azimuth, 'Geração Anual Estimada':geracao_anual_kwh})
+            st.subheader("Dados Paredes Externas")
+            st.write(f"Quantidade: {len(df_paredes)} paredes.")
+            st.dataframe(df_paredes, use_container_width=True)
 
-    lista_geracoes_telhados_df = pd.DataFrame(lista_geracoes_telhados)
-    lista_geracoes_telhados_df_renomeado = lista_geracoes_telhados_df.rename(columns={'Orientação: Norte': 'Orientação (Azimute °)'})
-
-    df_unidos = pd.merge(
-    dados_telhado_df,
-    lista_geracoes_telhados_df_renomeado[['Orientação (Azimute °)', 'Geração Anual Estimada']],
-    on='Orientação (Azimute °)')
+else:
+    st.info("Carregue um arquivo IFC para iniciar.")
 
 
-    
-
-    st.image("pvlib.png", width=900, output_format="auto")
-    st.dataframe(df_unidos)
-
-    st.header(f"Dados Janelas Externas:")    
-    st.write(f"Quantidade: {len(dados_janelas)} janelas.")
-    st.dataframe(df_janelas, use_container_width=True)
-    
-    
-    st.header("Dados Paredes Externas:")    
-    st.write(f"Quantidade: {len(dados_paredes)} paredes.")
-    st.dataframe(df_paredes, use_container_width=True)
 
 
