@@ -174,7 +174,7 @@ if uploaded_file:
     #     st.header("Cálculo por meio do PVLIB")
     
     with st.container():
-    c1, c2, c3 = st.columns([1, 2, 1])
+      c1, c2, c3 = st.columns([1, 2, 1])
     with c2:
         st.image("ime.png", width=100)
     st.dataframe(df_unidos)
@@ -188,3 +188,4 @@ if uploaded_file:
     st.write(f"Quantidade: {len(dados_paredes)} paredes.")
 
     st.dataframe(df_paredes, use_container_width=True)
+
