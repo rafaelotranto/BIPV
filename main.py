@@ -5,7 +5,7 @@ import tempfile
 import pvlib
 import core  # mantém suas funções
 import calculopvlib
-from utils import icon_text
+#from utils import icon_text
 
 
 st.set_page_config(page_title="BIPV IFC", page_icon="☀️", layout="wide")
@@ -178,4 +178,5 @@ else:
         col1, col2, col3 = st.columns([1, 3, 1])
     with col2:
         
+
         st.image("zero_energy.png", width=700,)
