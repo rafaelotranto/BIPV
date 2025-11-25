@@ -31,7 +31,7 @@ def converter_angulo_para_decimal(angulo_ifc):
     except (ValueError, TypeError):
         return None
 
-def find_true_north(ifc_file):
+def find_true_leste(ifc_file):
     map_conversions = ifc_file.by_type("IfcMapConversion")
     if map_conversions:
         mc = map_conversions[0]
@@ -39,14 +39,14 @@ def find_true_north(ifc_file):
             x, y = mc.XAxisAbscissa, mc.XAxisOrdinate
             if x is not None and y is not None: return (x, y)
 
-    contexts = ifc_file.by_type('IfcGeometricRepresentationContext')
-    for context in contexts:
-        if hasattr(context, 'TrueNorth') and context.TrueNorth and context.TrueNorth.is_a('IfcDirection'):
-            ratios = context.TrueNorth.DirectionRatios
-            if len(ratios) >= 2: return (ratios[0], ratios[1])
+    # contexts = ifc_file.by_type('IfcGeometricRepresentationContext')
+    # for context in contexts:
+    #     if hasattr(context, 'TrueNorth') and context.TrueNorth and context.TrueNorth.is_a('IfcDirection'):
+    #         ratios = context.TrueNorth.DirectionRatios
+    #         if len(ratios) >= 2: return (ratios[0], ratios[1])
 
-    print("AVISO: Norte Verdadeiro não encontrado. Usando Norte padrão (0, 1).")
-    return (0.0, 1.0)
+#    print("AVISO: Norte Verdadeiro não encontrado. Usando Norte padrão (0, 1).")
+#    return (0.0, 1.0)
 
 def calcular_angulo_vetor_graus(vetor):
     return math.degrees(math.atan2(vetor[1], vetor[0]))
@@ -58,10 +58,10 @@ def vector_to_angle_vs_north(vector, true_north_vector):
     norm_vec = vec_2d / np.linalg.norm(vec_2d)
     norm_north = north_2d / np.linalg.norm(north_2d)
     angle_rad = math.atan2(norm_vec[0], norm_vec[1]) - math.atan2(norm_north[0], norm_north[1])
-    angle_deg = math.degrees(angle_rad)
+    angle_deg = -math.degrees(angle_rad)
     return (angle_deg + 360) % 360
 
-# --- FUNÇÃO RE-ADICIONADA ---
+# # --- FUNÇÃO RE-ADICIONADA ---
 def get_orientation_from_normal(normal_vector, true_north):
     """Calcula o azimute de uma face em relação ao Norte Verdadeiro."""
     proj_xy = (normal_vector[0], normal_vector[1])
@@ -71,34 +71,72 @@ def get_orientation_from_normal(normal_vector, true_north):
 
     proj_unit = (proj_xy[0]/mag, proj_xy[1]/mag)
     # Produto escalar para encontrar o ângulo
-    dot = max(min(proj_unit[0]*true_north[0] + proj_unit[1]*true_north[1], 1.0), -1.0)
+    #dot = max(min(proj_unit[0]*true_north[0] + proj_unit[1]*true_north[1], 1.0), -1.0)
+    dot=  np.dot(proj_unit,true_north)
     ang_rad = math.acos(dot)
     ang_deg = math.degrees(ang_rad)
 
     # Produto vetorial (cruzado) para determinar o quadrante
     cross = proj_unit[0]*true_north[1] - proj_unit[1]*true_north[0]
     if cross < 0:
-        ang_deg = 360 - ang_deg
+        if ang_deg <270:
+            ang_deg = 90 + ang_deg
+        else: ang_deg = ang_deg - 90
 
     return ang_deg
+
+# def get_element_orientation_from_mesh(element):
+#     try:
+#         shape = ifcopenshell.geom.create_shape(SETTINGS, element)
+#         verts = np.array(shape.geometry.verts).reshape((-1, 3))
+#         faces = np.array(shape.geometry.faces).reshape((-1, 3))
+#         v0, v1, v2 = verts[faces[:, 0]], verts[faces[:, 1]], verts[faces[:, 2]]
+#         face_normals = np.cross(v1 - v0, v2 - v0)
+#         face_areas = np.linalg.norm(face_normals, axis=1) / 2.0
+#         valid_mask = (face_areas > 1e-6) & (np.abs(face_normals[:, 2]) < 0.2)
+#         if not np.any(valid_mask): return None
+#         rounded_normals = np.round(face_normals[valid_mask], decimals=2)
+#         unique_normals, inverse_indices = np.unique(rounded_normals, axis=0, return_inverse=True)
+#         total_area_per_normal = np.bincount(inverse_indices, weights=face_areas[valid_mask])
+#         dominant_normal = unique_normals[np.argmax(total_area_per_normal)]
+#         return dominant_normal / np.linalg.norm(dominant_normal)
+#     except Exception:
+#         return None
 
 def get_element_orientation_from_mesh(element):
     try:
         shape = ifcopenshell.geom.create_shape(SETTINGS, element)
         verts = np.array(shape.geometry.verts).reshape((-1, 3))
         faces = np.array(shape.geometry.faces).reshape((-1, 3))
+
         v0, v1, v2 = verts[faces[:, 0]], verts[faces[:, 1]], verts[faces[:, 2]]
         face_normals = np.cross(v1 - v0, v2 - v0)
         face_areas = np.linalg.norm(face_normals, axis=1) / 2.0
+
         valid_mask = (face_areas > 1e-6) & (np.abs(face_normals[:, 2]) < 0.2)
-        if not np.any(valid_mask): return None
+        if not np.any(valid_mask):
+            return None
+
         rounded_normals = np.round(face_normals[valid_mask], decimals=2)
         unique_normals, inverse_indices = np.unique(rounded_normals, axis=0, return_inverse=True)
         total_area_per_normal = np.bincount(inverse_indices, weights=face_areas[valid_mask])
         dominant_normal = unique_normals[np.argmax(total_area_per_normal)]
-        return dominant_normal / np.linalg.norm(dominant_normal)
+        dominant_normal = dominant_normal / np.linalg.norm(dominant_normal)
+
+        # --- Ajuste de direção da normal ---
+        centroid_element = np.mean(verts, axis=0)
+        dominant_face_indices = np.where(valid_mask)[0][np.argmax(total_area_per_normal)]
+        face_centroid = np.mean(verts[faces[dominant_face_indices]], axis=0)
+
+        vector_to_face = face_centroid - centroid_element
+        if np.dot(dominant_normal, vector_to_face) < 0:
+            dominant_normal = -dominant_normal
+
+        return dominant_normal
+
     except Exception:
         return None
+
 
 def get_pitch_angle_from_normal(normal_vector):
     cos_alpha = abs(normal_vector[2])
@@ -130,9 +168,10 @@ def extrair_info_geografica(ifc_file):
         site = sites[0]
         if site.RefLatitude: lat = converter_angulo_para_decimal(site.RefLatitude)
         if site.RefLongitude: lon = converter_angulo_para_decimal(site.RefLongitude)
-    norte_vetor = find_true_north(ifc_file)
+    norte_vetor = find_true_leste(ifc_file)
     norte_angulo = calcular_angulo_vetor_graus(norte_vetor)
-    return [{"Latitude": lat, "Longitude": lon, "Vetor Norte Verdadeiro": str(norte_vetor), "Ângulo Norte (vs Leste)": norte_angulo}]
+    # return [{"Latitude": lat, "Longitude": lon, "Vetor Norte Verdadeiro": str(norte_vetor), "Ângulo Norte (vs Leste)": norte_angulo}]
+    return [{"Latitude": lat, "Longitude": lon, "Vetor Norte Verdadeiro": norte_vetor, "Ângulo para Norte Verdadeiro (Referencia: Eixo Y sentido horário)": norte_angulo}]
 
 def extrair_dados_paredes(ifc_file, norte_vetor):
     dados_paredes = []
@@ -150,6 +189,7 @@ def extrair_dados_paredes(ifc_file, norte_vetor):
 
         normal = get_element_orientation_from_mesh(wall)
         orientacao = vector_to_angle_vs_north(normal, norte_vetor) if normal is not None else None
+        azimute= np.mod(orientacao +90, 360)
 
         quantities = {}
         for rel in ifc_file.get_inverse(wall):
@@ -160,14 +200,64 @@ def extrair_dados_paredes(ifc_file, norte_vetor):
         area_aberturas = sum(get_quantity_value(q) for opening in wall.HasOpenings for fill in opening.RelatedOpeningElement.HasFillings for rel_prop in ifc_file.get_inverse(fill.RelatedBuildingElement) if rel_prop.is_a("IfcRelDefinesByProperties") and rel_prop.RelatingPropertyDefinition.is_a("IfcElementQuantity") for q in rel_prop.RelatingPropertyDefinition.Quantities if q.is_a("IfcQuantityArea") and q.Name == 'Area' and get_quantity_value(q) is not None)
 
         # dados_paredes.append({"ID": wall.GlobalId, "Nome": wall.Name or "Sem Nome", "Orientação (Azimute °)": orientacao, "Comprimento (m)": quantities.get('Length'), "Altura (m)": quantities.get('Height'), "Área Bruta (m²)": quantities.get('GrossArea'), "Área de Aberturas (m²)": area_aberturas, "Área Líquida (m²)": quantities.get('NetArea')})
-        dados_paredes.append({"ID": wall.GlobalId, "Nome": wall.Name or "Sem Nome", "Orientação (Azimute °)": orientacao, "Comprimento (m)": quantities.get('Length'), "Altura (m)": quantities.get('Height'), "Área Bruta (m²)": quantities.get('Height') * quantities.get('Length'), "Área de Aberturas (m²)": area_aberturas, "Área Líquida (m²)": (quantities.get('Height') * quantities.get('Length')) - area_aberturas})
+        dados_paredes.append({"ID": wall.GlobalId, "Nome": wall.Name or "Sem Nome", "Orientação (Azimute °)": azimute, "Comprimento (m)": quantities.get('Length'), "Altura (m)": quantities.get('Height'), "Área Bruta (m²)": quantities.get('Height') * quantities.get('Length'), "Área de Aberturas (m²)": area_aberturas, "Área Líquida (m²)": (quantities.get('Height') * quantities.get('Length')) - area_aberturas})
     return dados_paredes
+
+def get_host_wall_from_window(ifc_file, window_element):
+    """
+    Encontra o elemento IfcWall que hospeda um determinado IfcWindow.
+
+    Args:
+        ifc_file: O arquivo IFC carregado.
+        window_element: O elemento IfcWindow.
+
+    Returns:
+        O elemento IfcWall hospedeiro, ou None se não for encontrado.
+    """
+    try:
+        # A janela preenche um vão (opening). Relação: IfcRelFillsElement
+        fills_inverse = ifc_file.get_inverse(window_element)
+        for rel_fills in fills_inverse:
+            if not rel_fills.is_a("IfcRelFillsElement"):
+                continue
+            
+            opening = rel_fills.RelatingOpeningElement
+            if not opening:
+                continue
+
+            # O vão subtrai (voids) uma parte da parede. Relação: IfcRelVoidsElement
+            voids_inverse = ifc_file.get_inverse(opening)
+            for rel_voids in voids_inverse:
+                if not rel_voids.is_a("IfcRelVoidsElement"):
+                    continue
+                
+                # Encontramos o elemento hospedeiro. Verificamos se é uma parede.
+                host_element = rel_voids.RelatingBuildingElement
+                if host_element.is_a("IfcWall"):
+                    return host_element # Sucesso! Retorna a parede.
+    except Exception:
+        return None
+    
+    return None # Se não encontrar por qualquer motivo
 
 def extrair_dados_janelas(ifc_file, norte_vetor):
     dados_janelas = []
     for window in ifc_file.by_type("IfcWindow"):
-        normal = get_element_orientation_from_mesh(window)
-        orientacao = vector_to_angle_vs_north(normal, norte_vetor) if normal is not None else None
+        
+        # --- LÓGICA ALTERADA ---
+        orientacao = None
+        # 1. Encontra a parede que hospeda a janela
+        host_wall = get_host_wall_from_window(ifc_file, window)
+        
+        if host_wall:
+            # 2. Calcula a normal A PARTIR DA PAREDE HOSPEDEIRA
+            normal = get_element_orientation_from_mesh(host_wall)
+            
+            # 3. Calcula a orientação usando a normal da parede
+            if normal is not None:
+                orientacao = vector_to_angle_vs_north(normal, norte_vetor)
+                azimute= np.mod(orientacao +90, 360)
+        # -----------------------
 
         quantities = {}
         for rel in ifc_file.get_inverse(window):
@@ -175,7 +265,14 @@ def extrair_dados_janelas(ifc_file, norte_vetor):
                 for q in rel.RelatingPropertyDefinition.Quantities:
                     quantities[q.Name] = get_quantity_value(q)
 
-        dados_janelas.append({"ID": window.GlobalId, "Nome": window.Name or "Sem Nome", "Orientação (Azimute °)": orientacao, "Área (m²)": quantities.get('Area'), "Largura (m)": quantities.get('Width'), "Altura (m)": quantities.get('Height')})
+        dados_janelas.append({
+            "ID": window.GlobalId, 
+             
+            "Orientação (Azimute °)": azimute, 
+            "Área (m²)": quantities.get('Area'), 
+            "Largura (m)": quantities.get('Width'), 
+            "Altura (m)": quantities.get('Height')
+        })
     return dados_janelas
 
 def extrair_dados_telhados(ifc_file, norte_vetor):
@@ -190,8 +287,10 @@ def extrair_dados_telhados(ifc_file, norte_vetor):
         except (AttributeError, StopIteration): pass
 
         # Agora a chamada para a função funcionará
-        orientacao = get_orientation_from_normal(normal_geom, norte_vetor) if normal_geom else None
-        inclinacao = get_pitch_angle_from_normal(normal_geom) if normal_geom else None
+        #orientacao = get_orientation_from_normal(normal_geom, norte_vetor) if normal_geom else None
+        orientacao = vector_to_angle_vs_north(normal_geom, norte_vetor)
+        azimute= np.mod(orientacao +90, 360)
+        inclinacao = get_pitch_angle_from_normal(normal_geom) if normal_geom else None 
 
         quantities = {}
         for rel in ifc_file.get_inverse(slab):
@@ -201,7 +300,7 @@ def extrair_dados_telhados(ifc_file, norte_vetor):
 
         properties = {p.Name: p.NominalValue.wrappedValue for rel in ifc_file.get_inverse(slab) if rel.is_a("IfcRelDefinesByProperties") and rel.RelatingPropertyDefinition.is_a("IfcPropertySet") for p in rel.RelatingPropertyDefinition.HasProperties if p.is_a("IfcPropertySingleValue")}
 
-        dados_telhados.append({"ID": slab.GlobalId, "Nome": slab.Name or "Sem Nome", "Orientação (Azimute °)": orientacao, "Inclinação (°)": properties.get('PitchAngle', inclinacao), "Área Bruta (m²)": quantities.get('GrossArea'), "Área Líquida (m²)": quantities.get('NetArea')})
+        dados_telhados.append({"ID": slab.GlobalId,  "Orientação (Azimute °)": azimute, "Inclinação (°)": properties.get('PitchAngle', inclinacao), "Área Bruta (m²)": quantities.get('GrossArea')})
     return dados_telhados
 
 # ------------------------------------------------------------------------------
@@ -217,7 +316,7 @@ def extrair_dados_telhados(ifc_file, norte_vetor):
 #     print("Extraindo informações geográficas e de orientação...")
 #     info_geral = extrair_info_geografica(ifc_file)
 #     df_geral = pd.DataFrame([info_geral])
-#     norte_vetor_principal = find_true_north(ifc_file)
+#     norte_vetor_principal = find_true_leste(ifc_file)
 
 #     print("Analisando paredes externas...")
 #     dados_paredes = extrair_dados_paredes(ifc_file, norte_vetor_principal)
