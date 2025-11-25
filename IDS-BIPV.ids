@@ -1,0 +1,266 @@
+<ids:ids xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://standards.buildingsmart.org/IDS http://standards.buildingsmart.org/IDS/1.0/ids.xsd" xmlns:ids="http://standards.buildingsmart.org/IDS">
+  <!--edited with usBIM.IDSeditor 2.3.8.0 (http://www.accasoftware.com)-->
+  <ids:info>
+    <ids:title>Uso Geração Fotovoltaica</ids:title>
+    <ids:copyright>Academico</ids:copyright>
+    <ids:version>1</ids:version>
+    <ids:description>IDS - Dissertação Farias</ids:description>
+    <ids:author>farias.thomas@ime.eb.br</ids:author>
+    <ids:date>2025-06-13</ids:date>
+    <ids:purpose>Verificação de nível de informação necessária ao Uso Geração Fotovoltaica</ids:purpose>
+    <ids:milestone>Ante-Projeto</ids:milestone>
+  </ids:info>
+  <ids:specifications>
+    <ids:specification ifcVersion="IFC4X3_ADD2" name="Uso Geração Fotovoltaica (Laje Telhado)" identifier="Slab.Roof" description="Verificação nível de Informação das lajes de telhado" instructions="Verificar se o nivel de informação necessária foi atingido no modelo">
+      <ids:applicability minOccurs="1" maxOccurs="unbounded">
+        <ids:entity>
+          <ids:name>
+            <ids:simpleValue>IFCSLAB</ids:simpleValue>
+          </ids:name>
+          <ids:predefinedType>
+            <ids:simpleValue>ROOF</ids:simpleValue>
+          </ids:predefinedType>
+        </ids:entity>
+      </ids:applicability>
+      <ids:requirements>
+        <ids:property dataType="IFCPLANEANGLEMEASURE" uri="https://ifc43-docs.standards.buildingsmart.org/IFC/RELEASE/IFC4x3/HTML/lexical/Pset_SlabCommon.htm" cardinality="required" instructions="Inclinação de Laje de Telhado Preenchida">
+          <ids:propertySet>
+            <ids:simpleValue>Pset_SlabCommon</ids:simpleValue>
+          </ids:propertySet>
+          <ids:baseName>
+            <ids:simpleValue>PitchAngle</ids:simpleValue>
+          </ids:baseName>
+        </ids:property>
+        <ids:property dataType="IFCBOOLEAN" uri="https://ifc43-docs.standards.buildingsmart.org/IFC/RELEASE/IFC4x3/HTML/lexical/Pset_SlabCommon.htm" cardinality="required" instructions="Face do telhado suportar carga">
+          <ids:propertySet>
+            <ids:simpleValue>Pset_SlabCommon</ids:simpleValue>
+          </ids:propertySet>
+          <ids:baseName>
+            <ids:simpleValue>LoadBearing</ids:simpleValue>
+          </ids:baseName>
+        </ids:property>
+        <ids:property uri="https://ifc43-docs.standards.buildingsmart.org/IFC/RELEASE/IFC4x3/HTML/lexical/Qto_SlabBaseQuantities.htm" cardinality="required" instructions="Largura do Telhado">
+          <ids:propertySet>
+            <ids:simpleValue>Qto_SlabBaseQuantities</ids:simpleValue>
+          </ids:propertySet>
+          <ids:baseName>
+            <ids:simpleValue>Width</ids:simpleValue>
+          </ids:baseName>
+        </ids:property>
+        <ids:property uri="https://ifc43-docs.standards.buildingsmart.org/IFC/RELEASE/IFC4x3/HTML/lexical/Qto_SlabBaseQuantities.htm" cardinality="required" instructions="Comprimento">
+          <ids:propertySet>
+            <ids:simpleValue>Qto_SlabBaseQuantities</ids:simpleValue>
+          </ids:propertySet>
+          <ids:baseName>
+            <ids:simpleValue>Length</ids:simpleValue>
+          </ids:baseName>
+        </ids:property>
+        <ids:property uri="https://ifc43-docs.standards.buildingsmart.org/IFC/RELEASE/IFC4x3/HTML/lexical/Qto_SlabBaseQuantities.htm" cardinality="required" instructions="Área Bruta do Telhado">
+          <ids:propertySet>
+            <ids:simpleValue>Qto_SlabBaseQuantities</ids:simpleValue>
+          </ids:propertySet>
+          <ids:baseName>
+            <ids:simpleValue>GrossArea</ids:simpleValue>
+          </ids:baseName>
+        </ids:property>
+      </ids:requirements>
+    </ids:specification>
+    <ids:specification ifcVersion="IFC4X3_ADD2" name="Uso Geração Fotovoltaica (Telhado)" identifier="Roof" description="Verificação nível de Informação do telhado" instructions="Telhado">
+      <ids:applicability minOccurs="1" maxOccurs="unbounded">
+        <ids:entity>
+          <ids:name>
+            <ids:simpleValue>IFCROOF</ids:simpleValue>
+          </ids:name>
+        </ids:entity>
+      </ids:applicability>
+      <ids:requirements>
+        <ids:attribute cardinality="required" instructions="https://ifc43-docs.standards.buildingsmart.org/IFC/RELEASE/IFC4x3/HTML/lexical/IfcRoof.htm">
+          <ids:name>
+            <ids:simpleValue>PredefinedType</ids:simpleValue>
+          </ids:name>
+        </ids:attribute>
+        <ids:property dataType="IFCAREAMEASURE" uri="https://ifc43-docs.standards.buildingsmart.org/IFC/RELEASE/IFC4x3/HTML/lexical/Qto_RoofBaseQuantities.htm" cardinality="required" instructions="Gross Area of the object. Openings, recesses, projections and cut-outs are not taken into account.&#xA;&#xA;Indicates the outer surface of the roof and the sum of all roof slab gross areas.">
+          <ids:propertySet>
+            <ids:simpleValue>Qto_RoofBaseQuantities</ids:simpleValue>
+          </ids:propertySet>
+          <ids:baseName>
+            <ids:simpleValue>GrossArea</ids:simpleValue>
+          </ids:baseName>
+        </ids:property>
+        <ids:property dataType="IFCBOOLEAN" uri="https://ifc43-docs.standards.buildingsmart.org/IFC/RELEASE/IFC4x3/HTML/lexical/Pset_RoofCommon.htm" cardinality="required" instructions="Indicates whether the object is intended to carry loads (TRUE) or not (FALSE).">
+          <ids:propertySet>
+            <ids:simpleValue>Pset_RoofCommon</ids:simpleValue>
+          </ids:propertySet>
+          <ids:baseName>
+            <ids:simpleValue>LoadBearing</ids:simpleValue>
+          </ids:baseName>
+        </ids:property>
+        <ids:property dataType="IFCBOOLEAN" uri="https://ifc43-docs.standards.buildingsmart.org/IFC/RELEASE/IFC4x3/HTML/lexical/Pset_RoofCommon.htm" cardinality="required" instructions="Indication whether the element is designed for use in the exterior (TRUE) or not (FALSE). If (TRUE) it is an external element and faces the outside of the building.">
+          <ids:propertySet>
+            <ids:simpleValue>Pset_RoofCommon</ids:simpleValue>
+          </ids:propertySet>
+          <ids:baseName>
+            <ids:simpleValue>IsExternal</ids:simpleValue>
+          </ids:baseName>
+        </ids:property>
+      </ids:requirements>
+    </ids:specification>
+    <ids:specification ifcVersion="IFC4X3_ADD2" name="Uso Geração Fotovoltaica (Paredes)" identifier="Wall" description="Verificação nível de Informação das paredes externas" instructions="Paredes">
+      <ids:applicability minOccurs="1" maxOccurs="unbounded">
+        <ids:entity>
+          <ids:name>
+            <ids:simpleValue>IFCWALL</ids:simpleValue>
+          </ids:name>
+        </ids:entity>
+      </ids:applicability>
+      <ids:requirements>
+        <ids:property dataType="IFCLENGTHMEASURE" uri="https://ifc43-docs.standards.buildingsmart.org/IFC/RELEASE/IFC4x3/HTML/lexical/Qto_WallBaseQuantities.htm" cardinality="required" instructions="The length of the object.&#xA;&#xA;Along center line (even if different to the wall path).">
+          <ids:propertySet>
+            <ids:simpleValue>Qto_WallBaseQuantities</ids:simpleValue>
+          </ids:propertySet>
+          <ids:baseName>
+            <ids:simpleValue>Width</ids:simpleValue>
+          </ids:baseName>
+        </ids:property>
+        <ids:property dataType="IFCLENGTHMEASURE" uri="https://ifc43-docs.standards.buildingsmart.org/IFC/RELEASE/IFC4x3/HTML/lexical/Qto_WallBaseQuantities.htm" cardinality="required" instructions="Characteristic height&#xA;&#xA;Total nominal height of the wall. It should only be provided, if it is constant along the wall path.">
+          <ids:propertySet>
+            <ids:simpleValue>Qto_WallBaseQuantities</ids:simpleValue>
+          </ids:propertySet>
+          <ids:baseName>
+            <ids:simpleValue>Height</ids:simpleValue>
+          </ids:baseName>
+        </ids:property>
+        <ids:property dataType="IFCBOOLEAN" uri="https://ifc43-docs.standards.buildingsmart.org/IFC/RELEASE/IFC4x3/HTML/lexical/Pset_WallCommon.htm" cardinality="required" instructions="Indication whether the element is designed for use in the exterior (TRUE) or not (FALSE). If (TRUE) it is an external element and faces the outside of the building.">
+          <ids:propertySet>
+            <ids:simpleValue>Pset_WallCommon</ids:simpleValue>
+          </ids:propertySet>
+          <ids:baseName>
+            <ids:simpleValue>IsExternal</ids:simpleValue>
+          </ids:baseName>
+        </ids:property>
+        <ids:property dataType="IFCBOOLEAN" uri="https://ifc43-docs.standards.buildingsmart.org/IFC/RELEASE/IFC4x3/HTML/lexical/Pset_WallCommon.htm" cardinality="required" instructions="Indicates whether the object is intended to carry loads (TRUE) or not (FALSE).">
+          <ids:propertySet>
+            <ids:simpleValue>Pset_WallCommon</ids:simpleValue>
+          </ids:propertySet>
+          <ids:baseName>
+            <ids:simpleValue>LoadBearing</ids:simpleValue>
+          </ids:baseName>
+        </ids:property>
+      </ids:requirements>
+    </ids:specification>
+    <ids:specification ifcVersion="IFC4X3_ADD2" name="Uso Geração Fotovoltaica (Janela)" identifier="Window" description="Verificação nível de Informação das janelas externas" instructions="Janelas">
+      <ids:applicability minOccurs="1" maxOccurs="unbounded">
+        <ids:entity>
+          <ids:name>
+            <ids:simpleValue>IFCWINDOW</ids:simpleValue>
+          </ids:name>
+        </ids:entity>
+      </ids:applicability>
+      <ids:requirements>
+        <ids:attribute cardinality="required" instructions="Overall measure of the height, it reflects the Z Dimension of a bounding box, enclosing the window opening. If omitted, the OverallHeight should be taken from the geometric representation of the IfcOpeningElement in which the window is inserted.">
+          <ids:name>
+            <ids:simpleValue>OverallHeight</ids:simpleValue>
+          </ids:name>
+        </ids:attribute>
+        <ids:attribute cardinality="required" instructions="Overall measure of the width, it reflects the X Dimension of a bounding box, enclosing the window opening. If omitted, the OverallWidth should be taken from the geometric representation of the IfcOpeningElement in which the window is inserted.">
+          <ids:name>
+            <ids:simpleValue>OverallWidth</ids:simpleValue>
+          </ids:name>
+        </ids:attribute>
+        <ids:property dataType="IFCCOUNTMEASURE" uri="https://ifc43-docs.standards.buildingsmart.org/IFC/RELEASE/IFC4x3/HTML/lexical/Pset_DoorWindowGlazingType.htm" cardinality="required" instructions="Number of glass layers within the frame. E.g. &quot;2&quot; for double glazing.">
+          <ids:propertySet>
+            <ids:simpleValue>Pset_DoorWindowGlazingType</ids:simpleValue>
+          </ids:propertySet>
+          <ids:baseName>
+            <ids:simpleValue>GlassLayers</ids:simpleValue>
+          </ids:baseName>
+        </ids:property>
+        <ids:property dataType="IFCBOOLEAN" uri="https://ifc43-docs.standards.buildingsmart.org/IFC/RELEASE/IFC4x3/HTML/lexical/Pset_DoorWindowGlazingType.htm" cardinality="required" instructions="Indication whether the glass is coated with a material (TRUE) or not (FALSE).">
+          <ids:propertySet>
+            <ids:simpleValue>Pset_DoorWindowGlazingType</ids:simpleValue>
+          </ids:propertySet>
+          <ids:baseName>
+            <ids:simpleValue>IsCoated</ids:simpleValue>
+          </ids:baseName>
+        </ids:property>
+        <ids:property dataType="IFCPOSITIVELENGTHMEASURE" uri="https://ifc43-docs.standards.buildingsmart.org/IFC/RELEASE/IFC4x3/HTML/lexical/Pset_DoorWindowGlazingType.htm" cardinality="required" instructions="Thickness of the first (inner) glass layer.">
+          <ids:propertySet>
+            <ids:simpleValue>Pset_DoorWindowGlazingType</ids:simpleValue>
+          </ids:propertySet>
+          <ids:baseName>
+            <ids:simpleValue>GlassThickness1</ids:simpleValue>
+          </ids:baseName>
+        </ids:property>
+        <ids:property dataType="IFCLABEL" uri="https://ifc43-docs.standards.buildingsmart.org/IFC/RELEASE/IFC4x3/HTML/lexical/Pset_DoorWindowGlazingType.htm" cardinality="required" instructions="Colour (tint) selection for this glazing. It is given for information purposes only.">
+          <ids:propertySet>
+            <ids:simpleValue>Pset_DoorWindowGlazingType</ids:simpleValue>
+          </ids:propertySet>
+          <ids:baseName>
+            <ids:simpleValue>GlassColour</ids:simpleValue>
+          </ids:baseName>
+        </ids:property>
+        <ids:property dataType="IFCBOOLEAN" uri="https://ifc43-docs.standards.buildingsmart.org/IFC/RELEASE/IFC4x3/HTML/lexical/Pset_WindowCommon.htm" cardinality="required" instructions="Indication whether the element is designed for use in the exterior (TRUE) or not (FALSE). If (TRUE) it is an external element and faces the outside of the building.">
+          <ids:propertySet>
+            <ids:simpleValue>Pset_WindowCommon</ids:simpleValue>
+          </ids:propertySet>
+          <ids:baseName>
+            <ids:simpleValue>IsExternal</ids:simpleValue>
+          </ids:baseName>
+        </ids:property>
+        <ids:property dataType="IFCPOSITIVERATIOMEASURE" uri="https://ifc43-docs.standards.buildingsmart.org/IFC/RELEASE/IFC4x3/HTML/lexical/Pset_WindowCommon.htm" cardinality="required" instructions="Fraction of the glazing area relative to the total area of the filling element. It shall be used, if the glazing area is not given separately for all panels within the filling element.">
+          <ids:propertySet>
+            <ids:simpleValue>Pset_WindowCommon</ids:simpleValue>
+          </ids:propertySet>
+          <ids:baseName>
+            <ids:simpleValue>GlazingAreaFraction</ids:simpleValue>
+          </ids:baseName>
+        </ids:property>
+        <ids:property dataType="IFCAREAMEASURE" uri="https://ifc43-docs.standards.buildingsmart.org/IFC/RELEASE/IFC4x3/HTML/lexical/Qto_WindowBaseQuantities.htm" cardinality="required" instructions="Calculated area for the object.&#xA;&#xA;Total area of the outer lining of the window.">
+          <ids:propertySet>
+            <ids:simpleValue>Qto_WindowBaseQuantities</ids:simpleValue>
+          </ids:propertySet>
+          <ids:baseName>
+            <ids:simpleValue>Area</ids:simpleValue>
+          </ids:baseName>
+        </ids:property>
+      </ids:requirements>
+    </ids:specification>
+    <ids:specification ifcVersion="IFC4X3_ADD2" name="Uso Geração Fotovoltaica (Site)" identifier="IfcSite" description="Dados de Localização do Projeto (IfcSite)" instructions="Instruções de Georeferenciamento">
+      <ids:applicability minOccurs="1" maxOccurs="unbounded">
+        <ids:entity>
+          <ids:name>
+            <ids:simpleValue>IFCSITE</ids:simpleValue>
+          </ids:name>
+        </ids:entity>
+      </ids:applicability>
+      <ids:requirements>
+        <ids:attribute cardinality="required" instructions="World Latitude at reference point (most likely defined in legal description). Defined as integer values for degrees, minutes, seconds, and, optionally, millionths of seconds with respect to the world geodetic system WGS84.">
+          <ids:name>
+            <ids:simpleValue>RefLatitude</ids:simpleValue>
+          </ids:name>
+        </ids:attribute>
+        <ids:attribute cardinality="required" instructions="World Longitude at reference point (most likely defined in legal description). Defined as integer values for degrees, minutes, seconds, and, optionally, millionths of seconds with respect to the world geodetic system WGS84.">
+          <ids:name>
+            <ids:simpleValue>RefLongitude</ids:simpleValue>
+          </ids:name>
+        </ids:attribute>
+      </ids:requirements>
+    </ids:specification>
+    <ids:specification ifcVersion="IFC4X3_ADD2" name="Uso Geração Fotovoltaica (Project)" identifier="IfcProjetc&#xA;&#xA;IfcGeometricRepresentationContext" description="Dados de Orientação do Projeto (IfcProject)&#xA;&#xA;IfcGeometricRepresentationContext" instructions="Instruções de Orientação ao Norte">
+      <ids:applicability minOccurs="1" maxOccurs="unbounded">
+        <ids:entity>
+          <ids:name>
+            <ids:simpleValue>IFCGEOMETRICREPRESENTATIONCONTEXT</ids:simpleValue>
+          </ids:name>
+        </ids:entity>
+      </ids:applicability>
+      <ids:requirements>
+        <ids:attribute cardinality="required" instructions="Direction of the true north, or geographic northing direction, relative to the underlying project coordinate system. It is given by a 2 dimensional direction within the xy-plane of the project coordinate system. If not present, it defaults to 0. 1., meaning that the positive Y axis of the project coordinate system equals the geographic northing direction.">
+          <ids:name>
+            <ids:simpleValue>TrueNorth</ids:simpleValue>
+          </ids:name>
+        </ids:attribute>
+      </ids:requirements>
+    </ids:specification>
+  </ids:specifications>
+</ids:ids>
