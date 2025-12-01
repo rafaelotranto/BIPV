@@ -5,7 +5,7 @@ import tempfile
 import pvlib
 import core  # mantém suas funções
 import calculopvlib
-#from utils import icon_text
+from utils import icon_text
 
 
 st.set_page_config(page_title="BIPV IFC", page_icon="☀️", layout="wide")
@@ -32,11 +32,11 @@ with st.sidebar:
     with st.container(border=False):
         c1, c2, c3 = st.columns([1, 2, 1])
         with c2:
-            st.image("ifc.logo.png", width=100)
+            st.image("ifc.logo.png", width=400)
             st.write("IFC")
-            st.image("ifc_openshell.png", width=100)
+            st.image("ifc_openshell.png", width=400)
             st.write("IFC Openshell")
-            st.image("pvlib_logo.png", width=100)
+            st.image("pvlib_logo.png", width=400)
             st.write("PVLIB")
 
 
@@ -60,10 +60,16 @@ if uploaded_file:
 
     # --- Extração de Dados do IFC ---
     with st.spinner("Extraindo dados do modelo BIM..."):
-        info_geral = core.extrair_info_geografica(ifc_file)
-        df_info_geral = pd.DataFrame(info_geral)
+        try:
+            info_geral = core.extrair_info_geografica(ifc_file)
+            df_info_geral = pd.DataFrame(info_geral)
+        except:
+            st.warning("O arquivo não apresenta as informações geográfica!")
 
-        norte_vetor_principal = core.find_true_leste(ifc_file)
+        try: 
+            norte_vetor_principal = core.find_true_north(ifc_file)
+        except:
+            st.warning("O arquivo não possui indicação de norte verdadeiro!")
 
         dados_paredes = core.extrair_dados_paredes(ifc_file, norte_vetor_principal)
         df_paredes = pd.DataFrame(dados_paredes)
@@ -91,7 +97,7 @@ if uploaded_file:
             with col3:
                 perdas_t = st.number_input("Perdas do Sistema (0–1)", 0.0, 1.0, 0.14, 0.01, key="perdas_t")
 
-        if st.button("Calcular Geração dos Telhados"):
+        if st.button("Calcular Geração dos Telhados", icon="☀️"):
             with st.spinner("Calculando geração com PVLib para os telhados..."):
                 st.session_state["df_telhados_resultados"] = calculopvlib.calcular_geracao_pv(
                     df_info_geral, df_telhados, ef_painel_t, ef_inversor_t, perdas_t
@@ -178,6 +184,4 @@ else:
         col1, col2, col3 = st.columns([1, 3, 1])
     with col2:
         
-
         st.image("zero_energy.png", width=700,)
-
