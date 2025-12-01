@@ -40,9 +40,12 @@ with st.sidebar:
         with c2:
             st.image("ifc.logo.png", width=100)
             #st.write("IFC")
+            st.write("")
             st.image("ifc_openshell.png", width=100)
             #st.write("IFC Openshell")
+            st.write("")
             st.image("pvlib_logo.png", width=100)
+            st.write("")
             #st.write("PVLIB")
 
 
@@ -186,6 +189,7 @@ else:
         
 
         st.image("zero_energy.png", width=700,)
+
 
 
 
