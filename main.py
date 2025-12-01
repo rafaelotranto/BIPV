@@ -97,7 +97,7 @@ if uploaded_file:
             with col3:
                 perdas_t = st.number_input("Perdas do Sistema (0–1)", 0.0, 1.0, 0.14, 0.01, key="perdas_t")
 
-        if st.button("Calcular Geração dos Telhados"):
+        if st.button("☀️Calcular Geração dos Telhados"):
             with st.spinner("Calculando geração com PVLib para os telhados..."):
                 st.session_state["df_telhados_resultados"] = calculopvlib.calcular_geracao_pv(
                     df_info_geral, df_telhados, ef_painel_t, ef_inversor_t, perdas_t
@@ -124,7 +124,7 @@ if uploaded_file:
             with col3j:
                 perdas_j = st.number_input("Perdas do Sistema (0–1)", 0.0, 1.0, 0.15, 0.01, key="perdas_j")
 
-        if st.button("Calcular Geração das Janelas"):
+        if st.button("☀️ Calcular Geração das Janelas"):
             df_janelas_pv = df_janelas.copy()
             df_janelas_pv['Inclinação (°)'] = 90.0
             df_janelas_pv.rename(columns={'Área (m²)': 'Área Bruta (m²)'}, inplace=True)
@@ -159,7 +159,7 @@ if uploaded_file:
             with col3p:
                 perdas_p = st.number_input("Perdas do Sistema (0–1)", 0.0, 1.0, 0.16, 0.01, key="perdas_p")
 
-        if st.button("Calcular Geração das Paredes"):
+        if st.button("☀️ Calcular Geração das Paredes"):
             df_paredes_pv['Inclinação (°)'] = 90.0
             
             with st.spinner("Calculando geração com PVLib para as paredes..."):
@@ -186,5 +186,6 @@ else:
         
 
         st.image("zero_energy.png", width=700,)
+
 
 
