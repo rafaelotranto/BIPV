@@ -7,6 +7,12 @@ import core  # mantém suas funções
 import calculopvlib
 from utils import icon_text
 
+# Inicializando variáveis da sessão
+for key in ["df_telhados_resultados", "df_janelas_resultados", "df_paredes_resultados"]:
+    if key not in st.session_state:
+        st.session_state[key] = None
+
+
 
 st.set_page_config(page_title="BIPV IFC", page_icon="☀️", layout="wide")
 
@@ -180,3 +186,4 @@ else:
         
 
         st.image("zero_energy.png", width=700,)
+
