@@ -32,11 +32,11 @@ with st.sidebar:
     with st.container(border=False):
         c1, c2, c3 = st.columns([1, 2, 1])
         with c2:
-            st.image("ifc.logo.png", width=100)
+            st.image("ifc.logo.png", width=400)
             st.write("IFC")
-            st.image("ifc_openshell.png", width=100)
+            st.image("ifc_openshell.png", width=400)
             st.write("IFC Openshell")
-            st.image("pvlib_logo.png", width=100)
+            st.image("pvlib_logo.png", width=400)
             st.write("PVLIB")
 
 
@@ -60,16 +60,10 @@ if uploaded_file:
 
     # --- Extração de Dados do IFC ---
     with st.spinner("Extraindo dados do modelo BIM..."):
-        try:
-            info_geral = core.extrair_info_geografica(ifc_file)
-            df_info_geral = pd.DataFrame(info_geral)
-        except:
-            st.warning("O arquivo não apresenta as informações geográfica!")
+        info_geral = core.extrair_info_geografica(ifc_file)
+        df_info_geral = pd.DataFrame(info_geral)
 
-        try: 
-            norte_vetor_principal = core.find_true_north(ifc_file)
-        except:
-            st.warning("O arquivo não possui indicação de norte verdadeiro!")
+        norte_vetor_principal = core.find_true_leste(ifc_file)
 
         dados_paredes = core.extrair_dados_paredes(ifc_file, norte_vetor_principal)
         df_paredes = pd.DataFrame(dados_paredes)
@@ -184,5 +178,4 @@ else:
         col1, col2, col3 = st.columns([1, 3, 1])
     with col2:
         
-
         st.image("zero_energy.png", width=700,)
