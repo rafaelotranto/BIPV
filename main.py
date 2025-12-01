@@ -91,7 +91,7 @@ if uploaded_file:
             with col3:
                 perdas_t = st.number_input("Perdas do Sistema (0–1)", 0.0, 1.0, 0.14, 0.01, key="perdas_t")
 
-        if st.button("Calcular Geração dos Telhados", icon="☀️"):
+        if st.button("Calcular Geração dos Telhados"):
             with st.spinner("Calculando geração com PVLib para os telhados..."):
                 st.session_state["df_telhados_resultados"] = calculopvlib.calcular_geracao_pv(
                     df_info_geral, df_telhados, ef_painel_t, ef_inversor_t, perdas_t
