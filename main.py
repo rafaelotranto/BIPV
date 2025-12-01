@@ -38,6 +38,7 @@ with st.sidebar:
     with st.container(border=False):
         c1, c2, c3 = st.columns([1, 2, 1])
         with c2:
+            st.write("")
             st.image("ifc.logo.png", width=100)
             #st.write("IFC")
             st.write("")
@@ -189,6 +190,7 @@ else:
         
 
         st.image("zero_energy.png", width=700,)
+
 
 
 
