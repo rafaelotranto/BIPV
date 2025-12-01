@@ -39,11 +39,11 @@ with st.sidebar:
         c1, c2, c3 = st.columns([1, 2, 1])
         with c2:
             st.image("ifc.logo.png", width=100)
-            st.write("IFC")
+            #st.write("IFC")
             st.image("ifc_openshell.png", width=100)
-            st.write("IFC Openshell")
+            #st.write("IFC Openshell")
             st.image("pvlib_logo.png", width=100)
-            st.write("PVLIB")
+            #st.write("PVLIB")
 
 
 # -------------------------
@@ -186,6 +186,7 @@ else:
         
 
         st.image("zero_energy.png", width=700,)
+
 
 
 
